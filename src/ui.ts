@@ -135,6 +135,31 @@ export function call() {
     document.querySelector<HTMLButtonElement>("button.call")?.click();
 }
 
+export function customRaise(amount: number | undefined, callback?: () => void) {
+    const currentStack = getStack();
+    if (amount === undefined) {
+        throw new Error("Custom Raise amount is undefined")
+    }
+    
+    // if (amount >= currentStack) {
+    //     // If the desired raise is above or equal to our stack,
+    //     // we call allInRaise to handle it appropriately.
+    //     allInRaise(callback || (() => {}));
+    //     return; 
+    // }
+    
+    withRaiseMenu(() => {
+        const raiseInput = document.querySelector<HTMLInputElement>('.raise-bet-value input');
+        if (!raiseInput) {
+            throw new Error("Custom raise input field not found.");
+        }
+
+        raiseInput.value = amount.toString();
+        raiseInput.dispatchEvent(new Event('input', { bubbles: true }));
+        callback?.();
+    });
+}
+
 function withRaiseMenu(action: () => void) {
     const raiseButton = document.querySelector<HTMLButtonElement>("button.raise")!;
 

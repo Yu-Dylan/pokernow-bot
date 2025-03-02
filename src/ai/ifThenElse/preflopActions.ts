@@ -3,15 +3,18 @@ import { getHighestCard, getLowestCard } from "../aiUtils";
 import { lerp } from "../lerp";
 import { checkCallBased, postfixNameToCall, probabilisticAction, toCallDependent, uniformFill } from "../probabilisticAction";
 import { bestHandAction } from "./handActions";
+import { customRaise } from "../../ui"; 
 
 
 export function preflopAction(state: State): Action {
     const hasPair = state.hand[0].value.code === state.hand[1].value.code;
+    
+    // if (hasPair)
+    //     return pairPreflopAction(state);
+    // else
+    //     return nonPairPreflopAction(state);
 
-    if (hasPair)
-        return pairPreflopAction(state);
-    else
-        return nonPairPreflopAction(state);
+    return {type: "raise", raiseAmount: state.stack/2};
 }
 
 function pairPreflopAction(state: State): Action {
@@ -164,6 +167,7 @@ function pureTrashAction(state: State): Action {
 }
 
 function faceAction(state: State): Action {
+    return {type: "raise", raiseAmount: state.stack};
     return probabilisticAction(postfixNameToCall("pre-face", state), state, toCallDependent(state, {
         zero: {
             checkFoldProbability: 0.7,
