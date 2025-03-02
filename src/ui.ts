@@ -101,12 +101,67 @@ export function getPrevPhasePot() {
     return parseInt(prevPotText ?? "0");
 }
 
+export function getPhasePip() {
+    const phasePipText = document.querySelector(".table-player.you-player .table-player-bet-value .chips-value .normal-value")?.textContent;
+    return parseInt(phasePipText ?? "0");
+}
+
+function getSeatNumberFromElement(el: Element): number | null {
+    const classes = el.className.split(/\s+/);
+    for (const cls of classes) {
+        // Match "table-player-<number>", but not "table-player" itself.
+        const match = cls.match(/^table-player-(\d+)$/);
+        if (match) {
+        return parseInt(match[1], 10);
+        }
+    }
+    return null;
+}
+
+export function getMySeatNumber(): number | null {
+    const myPlayer = document.querySelector(".table-player.you-player");
+    if (!myPlayer) {
+        console.warn("Your player element was not found.");
+        return null;
+    }
+    return getSeatNumberFromElement(myPlayer);
+}
+
+export function getDealerSeatNumber(): number | null {
+    const dealerButton = document.querySelector('.dealer-button-ctn');
+    if (!dealerButton) {
+        console.warn("Dealer button element not found.");
+        return null;
+    }
+    const classes = dealerButton.className.split(/\s+/);
+    const dealerPosClass = classes.find(cls => cls.startsWith("dealer-position-"));
+    if (!dealerPosClass) return null;
+    const posStr = dealerPosClass.replace("dealer-position-", "");
+    const posNum = parseInt(posStr, 10);
+    return isNaN(posNum) ? null : posNum;
+}
+
+export function getAllPlayers(active: boolean = true): number[] {
+    let allPlayerElements: Element[] = Array.from(document.querySelectorAll('.table-player'));
+    if (active) {
+        allPlayerElements = allPlayerElements.filter(
+            el => {return !el.classList.contains("folded") &&
+                   window.getComputedStyle(el).display !== "none";}
+        );
+    } 
+    const allPlayerSeats: number[] = allPlayerElements.map(getSeatNumberFromElement).filter((n): n is number => n !== null);
+    allPlayerSeats.sort((a, b) => a - b);
+    return allPlayerSeats;
+}
+
 export function getState(): State {
     const hand = getHandCards();
     const board = getBoardCards();
+    const activePlayers = getAllPlayers(true); 
 
     return {
         phase: getPhase(),
+        phasePip: getPhasePip(), 
         handRank: getHandRank(),
         hand,
         board,
@@ -116,6 +171,9 @@ export function getState(): State {
         pot: getTotalPot(),
         prevPhasePot: getPrevPhasePot(),
         toCall: getToCallValue(),
+        activePlayers: activePlayers,
+        dealerSeat: getDealerSeatNumber(),
+        mySeat: getMySeatNumber(),
     };
 }
 

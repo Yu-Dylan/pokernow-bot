@@ -66,15 +66,14 @@ export function sanitizeAction(action: Action | undefined, state: State) {
         //         sanitized.raiseAmount = "min";
         //         break;
         // }
-        const currentPip: number = ((state.pot - state.prevPhasePot) + state.toCall);
         if (sanitized.raiseAmount === undefined || sanitized.raiseAmount < 0) {
             sanitized.raiseAmount = 0;
         }
-        else if (sanitized.raiseAmount < state.toCall) {
+        else if (sanitized.raiseAmount < state.toCall + state.phasePip) {
             sanitized.raiseAmount = state.toCall;
         }
-        else if (sanitized.raiseAmount > state.stack) {
-            sanitized.raiseAmount = state.stack;
+        else if (sanitized.raiseAmount > state.stack + state.phasePip) {
+            sanitized.raiseAmount = state.stack + state.phasePip;
         }
     }
 

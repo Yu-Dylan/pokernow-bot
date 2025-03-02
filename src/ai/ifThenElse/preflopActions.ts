@@ -14,7 +14,7 @@ export function preflopAction(state: State): Action {
     // else
     //     return nonPairPreflopAction(state);
 
-    return {type: "raise", raiseAmount: state.stack/2};
+    return {type: "raise", raiseAmount: state.stack + state.phasePip-1};
 }
 
 function pairPreflopAction(state: State): Action {
@@ -167,7 +167,6 @@ function pureTrashAction(state: State): Action {
 }
 
 function faceAction(state: State): Action {
-    return {type: "raise", raiseAmount: state.stack};
     return probabilisticAction(postfixNameToCall("pre-face", state), state, toCallDependent(state, {
         zero: {
             checkFoldProbability: 0.7,

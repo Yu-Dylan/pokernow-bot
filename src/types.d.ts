@@ -98,6 +98,10 @@ type State = {
      * You can test for equality against the ranks you find in rank.ts.
      * If you need to test if a rank is higher than another use .code.
      */
+    phasePip: number,
+    /**
+     * How much current player has committed to pot during this phase
+     */
     handRank: HandRank,
     /**
      * Your hole cards
@@ -132,4 +136,16 @@ type State = {
      * The amount of chips you need to call. Zero if you go first or if the opponent checked.
      */
     toCall: number,
+    /**
+     * Seat numbers of players still in the hand
+     */
+    activePlayers: number[],
+    /**
+     * The seat number the dealer button is at
+     */
+    dealerSeat: number | null,
+    /**
+     * My seat number
+     */
+    mySeat: number | null, 
 };
