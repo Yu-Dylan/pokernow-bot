@@ -4,17 +4,22 @@ import { lerp } from "../lerp";
 import { checkCallBased, postfixNameToCall, probabilisticAction, toCallDependent, uniformFill } from "../probabilisticAction";
 import { bestHandAction } from "./handActions";
 import { customRaise } from "../../ui"; 
+import { rangeChart, getBetThreshold } from "../ranges";
 
 
 export function preflopAction(state: State): Action {
-    const hasPair = state.hand[0].value.code === state.hand[1].value.code;
-    
-    // if (hasPair)
-    //     return pairPreflopAction(state);
-    // else
-    //     return nonPairPreflopAction(state);
-
-    return {type: "raise", raiseAmount: state.stack + state.phasePip-1};
+    const threshold = getBetThreshold(rangeChart, state.hand);
+    if (threshold > 1) {
+        return {type: "raise", raiseAmount: 3*(state.phasePip + state.toCall)};
+    }
+    else {
+        if (state.toCall > 0){
+            return {type: "call"};
+        }
+        else{
+            return {type: "check_or_fold"};
+        }
+    }
 }
 
 function pairPreflopAction(state: State): Action {

@@ -25,10 +25,10 @@ const probabilityToAction: ProbabilityToAction = {
     checkFoldProbability: (_state: State) => ({ type: "check_or_fold", raiseAmount: undefined}),
     callProbability: (_state: State) => ({ type: "call", raiseAmount: undefined}),
     // Example: half-pot raise adds half the current pot to the call amount.
-    minRaiseProbability: (state: State) => ({ type: "raise", raiseAmount: Math.min(1, state.phasePip + 2*state.toCall)}),
-    halfPotRaiseProbability: (state: State) => ({ type: "raise", raiseAmount: state.pot/2}),
+    minRaiseProbability: (state: State) => ({ type: "raise", raiseAmount: Math.max(state.bigBlind, state.phasePip + 2*state.toCall)}),
+    halfPotRaiseProbability: (state: State) => ({ type: "raise", raiseAmount: (state.pot + state.toCall)/2 + state.phasePip + state.toCall}),
     // Example: pot raise adds the full pot to the call amount.
-    potRaiseProbability: (state: State) => ({ type: "raise", raiseAmount: state.pot}),
+    potRaiseProbability: (state: State) => ({ type: "raise", raiseAmount: state.pot + state.toCall + state.phasePip + state.toCall}),
     // Example: all-in raise simply raises your full stack.
     allInProbability: (state: State) => ({ type: "raise", raiseAmount: state.stack + state.phasePip}),
 };

@@ -34,7 +34,7 @@ export function performAction(action: Action, callback: () => void) {
             //     break;
 
         // }
-        customRaise(action.raiseAmount, callback);
+        (customRaise(action.raiseAmount, callback));
     }
 }
 
@@ -66,11 +66,11 @@ export function sanitizeAction(action: Action | undefined, state: State) {
         //         sanitized.raiseAmount = "min";
         //         break;
         // }
-        if (sanitized.raiseAmount === undefined || sanitized.raiseAmount < 0) {
-            sanitized.raiseAmount = 0;
+        if (sanitized.raiseAmount === undefined || sanitized.raiseAmount <= 0) {
+            sanitized.type = "check_or_fold";
         }
-        else if (sanitized.raiseAmount < state.toCall + state.phasePip) {
-            sanitized.raiseAmount = state.toCall;
+        else if (sanitized.raiseAmount <= state.toCall + state.phasePip) {
+            sanitized.raiseAmount = state.toCall + state.phasePip;
         }
         else if (sanitized.raiseAmount > state.stack + state.phasePip) {
             sanitized.raiseAmount = state.stack + state.phasePip;
