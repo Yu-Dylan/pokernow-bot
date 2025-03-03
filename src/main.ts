@@ -4,7 +4,7 @@ import { performAction, sanitizeAction } from "./action";
 import { getNewState } from "./mainUtils";
 
 
-const timeoutMs = 500;
+const timeoutMs = 10;
 let botLoopTimeout: NodeJS.Timer | undefined;
 let state: State;
 
@@ -23,7 +23,6 @@ function startBotLoop() {
         // state = getNewState(state, newState);
         const newState = getState();
         state = getNewState(state, newState);
-        console.log("state: ", state);
         if (isMyTurn()) {
             console.log("bot turn");
             
