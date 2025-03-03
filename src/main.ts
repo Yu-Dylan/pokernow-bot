@@ -22,11 +22,11 @@ function startBotLoop() {
         // const newState = getState();
         // state = getNewState(state, newState);
         const newState = getState();
+        const oldState = state;
         state = getNewState(state, newState);
         if (isMyTurn()) {
             console.log("bot turn");
-            
-            //state = getNewState(state, getState());
+            console.log("old state: ", oldState);
             console.log("state: ", state);
 
             let action: Action | undefined;

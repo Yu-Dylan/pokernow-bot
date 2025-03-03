@@ -25,6 +25,10 @@ export function isRaised(state: State, newState: State): Seat | undefined {
     return undefined;
 }
 
+export function isNewPhase(state: State, newState: State): boolean {
+    return ((newState.phase.code - state.phase.code) === 1);
+}
+
 /**
  * Generates a descriptor for the current phase of the game based on the given state and new state.
  *
@@ -58,6 +62,13 @@ export function getNewState(state: State, newState: State): State {
         return newState;
     }
     const newPhaseDescriptor: PhaseDescriptor = getPhaseDescriptor(state, newState);
-    newState.phaseXBet[(newState.phase.code as number)] = newPhaseDescriptor; 
+    newState.phaseXBet = state.phaseXBet;
+    if (!isNewPhase(state, newState)) { 
+        newState.phaseXBet[(newState.phase.code as number)] = newPhaseDescriptor; 
+    }
+    else {
+        newState.phaseXBet[(state.phase.code as number)] = newPhaseDescriptor;
+        newState.phaseXBet[(newState.phase.code as number)] = {xBet: 0, aggressor: null};
+    }
     return newState;
 }
