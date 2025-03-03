@@ -6,6 +6,26 @@ export function isMyTurn() {
     return document.querySelector(".action-signal") !== null;
 }
 
+export function whoseTurn(): Seat {
+    const activePlayerElement = document.querySelector('.table-player.decision-current');
+    
+    if (!activePlayerElement) {
+        return null; 
+    }
+    
+    return getSeatNumberFromElement(activePlayerElement);
+}
+
+export function handIsOver(): boolean {
+    const winningPlayerElement = document.querySelector('.table-player.winner');
+
+    if (!winningPlayerElement) {
+        return false; 
+    }
+
+    return true;
+}
+
 export function parseCard(element: Element): Card {
     if (!element)
         throw new Error("can't parse card from null element");
@@ -106,19 +126,20 @@ export function getPhasePip() {
     return parseInt(phasePipText ?? "0");
 }
 
-function getSeatNumberFromElement(el: Element): number | null {
+function getSeatNumberFromElement(el: Element): Seat {
     const classes = el.className.split(/\s+/);
     for (const cls of classes) {
         // Match "table-player-<number>", but not "table-player" itself.
         const match = cls.match(/^table-player-(\d+)$/);
         if (match) {
-        return parseInt(match[1], 10);
+            const seat = parseInt(match[1], 10);
+            return seat >= 1 && seat <= 10 ? seat as Seat : null;
         }
     }
     return null;
 }
 
-export function getMySeatNumber(): number | null {
+export function getMySeatNumber(): Seat {
     const myPlayer = document.querySelector(".table-player.you-player");
     if (!myPlayer) {
         console.warn("Your player element was not found.");
@@ -127,37 +148,52 @@ export function getMySeatNumber(): number | null {
     return getSeatNumberFromElement(myPlayer);
 }
 
-export function getDealerSeatNumber(): number | null {
+export function getDealerSeatNumber(): Seat {
     const dealerButton = document.querySelector('.dealer-button-ctn');
     if (!dealerButton) {
         console.warn("Dealer button element not found.");
         return null;
     }
-    const classes = dealerButton.className.split(/\s+/);
-    const dealerPosClass = classes.find(cls => cls.startsWith("dealer-position-"));
-    if (!dealerPosClass) return null;
-    const posStr = dealerPosClass.replace("dealer-position-", "");
-    const posNum = parseInt(posStr, 10);
-    return isNaN(posNum) ? null : posNum;
+    return getSeatNumberFromElement(dealerButton);
 }
 
-export function getAllPlayers(active: boolean = true): number[] {
+export function getPhasePipFromElement(el: Element): number {
+    const pipText = el.querySelector(".table-player-bet-value .chips-value .normal-value")?.textContent;
+    const pip = parseInt(pipText ?? "0", 10);
+    return isNaN(pip) ? 0 : pip;
+}
+
+export function getAllPlayerPhasePip(active: boolean = true): Map<Seat, number> {
     let allPlayerElements: Element[] = Array.from(document.querySelectorAll('.table-player'));
+    allPlayerElements = allPlayerElements.filter(el => 
+        !el.classList.contains("offline") &&
+        !el.classList.contains("away") &&
+        window.getComputedStyle(el).display !== "none"
+    );
+
     if (active) {
-        allPlayerElements = allPlayerElements.filter(
-            el => {return !el.classList.contains("folded") &&
-                   window.getComputedStyle(el).display !== "none";}
-        );
-    } 
-    const allPlayerSeats: number[] = allPlayerElements.map(getSeatNumberFromElement).filter((n): n is number => n !== null);
-    allPlayerSeats.sort((a, b) => a - b);
-    return allPlayerSeats;
+        allPlayerElements = allPlayerElements.filter(el => 
+            !el.classList.contains("fold") &&
+            window.getComputedStyle(el).display !== "none"
+        );   
+    }
+
+    const pipMap = new Map<Seat, number>();
+    allPlayerElements.forEach(el => {
+        const seat = getSeatNumberFromElement(el);
+        if (seat !== null) {
+            const pip = getPhasePipFromElement(el);
+            pipMap.set(seat, pip);
+        }
+    });
+    return pipMap;
 }
 
 export function getState(): State {
     const hand = getHandCards();
     const board = getBoardCards();
-    const activePlayers = getAllPlayers(true); 
+    const activePlayersPhasePips = getAllPlayerPhasePip(true); 
+    const allPlayersIn = Array.from(getAllPlayerPhasePip(false).keys());
 
     return {
         phase: getPhase(),
@@ -171,9 +207,18 @@ export function getState(): State {
         pot: getTotalPot(),
         prevPhasePot: getPrevPhasePot(),
         toCall: getToCallValue(),
-        activePlayers: activePlayers,
+        activePlayerPhasePips: activePlayersPhasePips,
+        phaseXBet: [
+            {xBet: 1, aggressor: null},
+            {xBet: 0, aggressor: null},
+            {xBet: 0, aggressor: null},
+            {xBet: 0, aggressor: null}
+        ], 
+        allPlayersIn: allPlayersIn,
         dealerSeat: getDealerSeatNumber(),
         mySeat: getMySeatNumber(),
+        whoseTurn: whoseTurn(),
+        isHandOver: handIsOver()
     };
 }
 

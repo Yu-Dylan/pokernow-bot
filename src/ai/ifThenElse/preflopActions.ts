@@ -9,10 +9,10 @@ import { rangeChart, getBetThreshold } from "../ranges";
 
 export function preflopAction(state: State): Action {
     const threshold = getBetThreshold(rangeChart, state.hand);
-    if (threshold > 1) {
-        return {type: "raise", raiseAmount: 3*(state.phasePip + state.toCall)};
+    if (threshold > state.phaseXBet[0].xBet) {  
+        return {type: "raise", raiseAmount: (state.activePlayerPhasePips.size + 3)*(state.phasePip + state.toCall)};
     }
-    else {
+    else if (threshold === state.phaseXBet[0].xBet) {
         if (state.toCall > 0){
             return {type: "call"};
         }
@@ -20,6 +20,10 @@ export function preflopAction(state: State): Action {
             return {type: "check_or_fold"};
         }
     }
+    else {
+        return {type: "check_or_fold"};
+    }
+    // return {type: "raise", raiseAmount: (state.phaseXBet[0].xBet)*(state.phasePip + state.toCall)};
 }
 
 function pairPreflopAction(state: State): Action {

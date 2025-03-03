@@ -62,6 +62,11 @@ type HandRank = {
 type PhaseName = "preflop" | "flop" | "turn" | "river";
 type PhaseCode = 0 | 1 | 2 | 3;
 
+type PhaseDescriptor = {
+    xBet: number, 
+    aggressor: Seat, 
+}
+
 /**
  * Preflop, flop, ...
  * 
@@ -81,6 +86,8 @@ type Phase = {
      */
     code: PhaseCode,
 };
+
+type Seat = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | null;
 
 type State = {
     /**
@@ -139,13 +146,22 @@ type State = {
     /**
      * Seat numbers of players still in the hand
      */
-    activePlayers: number[],
+    activePlayerPhasePips: Map<Seat, number>,
+    phaseXBet: [
+        preFlopDescriptor: PhaseDescriptor, 
+        flopDescriptor: PhaseDescriptor, 
+        turnDescriptor: PhaseDescriptor, 
+        riverDescriptor: PhaseDescriptor
+    ],
+    allPlayersIn: Seat[],
     /**
      * The seat number the dealer button is at
      */
-    dealerSeat: number | null,
+    dealerSeat: Seat,
     /**
      * My seat number
      */
-    mySeat: number | null, 
+    mySeat: Seat, 
+    whoseTurn: Seat,
+    isHandOver: boolean
 };

@@ -1,10 +1,12 @@
 import { getAction } from "./ai/ai";
 import { getBigBlindValue, getState, isMyTurn, showHandIfPossible } from "./ui";
 import { performAction, sanitizeAction } from "./action";
+import { getNewState } from "./mainUtils";
 
 
 const timeoutMs = 500;
 let botLoopTimeout: NodeJS.Timer | undefined;
+let state: State;
 
 console.log(`"pokerbot v${chrome.runtime.getManifest().version}"`);
 
@@ -14,11 +16,18 @@ function startBotLoop() {
     console.log("starting bot");
     console.log("big blind: " + getBigBlindValue());
 
+    state = getState(); 
+
     function botLoop() {
+        // const newState = getState();
+        // state = getNewState(state, newState);
+        const newState = getState();
+        state = getNewState(state, newState);
+        console.log("state: ", state);
         if (isMyTurn()) {
             console.log("bot turn");
             
-            const state = getState();
+            //state = getNewState(state, getState());
             console.log("state: ", state);
 
             let action: Action | undefined;
