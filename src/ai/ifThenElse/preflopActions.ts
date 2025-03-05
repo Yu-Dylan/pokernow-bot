@@ -13,13 +13,20 @@ function facingLimp(state: State): Action {
     const position = getRelativePosition(state);
 
     const raiseAction: Action = {type: "raise", raiseAmount: (2+limpers)*state.bigBlind};
-    const limpAction: Action = (state.toCall > 0) ? {type: "call"} : {type: "check_or_fold"};
+    const limpAction: Action = (state.toCall > 0) ? {type: "call"} : {type: "check_or_fold"}
+    const foldAction: Action = {type: "check_or_fold"};
 
     if (threshold >= 2) {
         return raiseAction; 
     }
     else {
-        return limpAction; 
+        if (limpers >= state.allPlayersIn.length-3){
+            const limpProbability = 0.3;
+            return Math.random() < limpProbability ? limpAction : foldAction;
+        }
+        else {
+            return foldAction;
+        }
     }
 }
 

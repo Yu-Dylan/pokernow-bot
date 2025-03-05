@@ -7,7 +7,6 @@ import { getNewState } from "./mainUtils";
 const timeoutMs = 200;
 let botLoopTimeout: NodeJS.Timer | undefined;
 let state: State;
-let myTurn: boolean;
 
 console.log(`"pokerbot v${chrome.runtime.getManifest().version}"`);
 
@@ -20,11 +19,16 @@ function startBotLoop() {
     state = getState(); 
 
     function botLoop() {
-        // const newState = getState();
-        // state = getNewState(state, newState);
         const newState = getState();
         const oldState = state;
         state = getNewState(state, newState);
+        
+        // If the hand is over, just wait for the next hand
+        if (state.isHandOver) {
+            botLoopTimeout = setTimeout(botLoop, timeoutMs);
+            return;
+        }
+
         if (isMyTurn()) {
             console.log("bot turn");
             console.log("old state: ", oldState);
@@ -48,7 +52,6 @@ function startBotLoop() {
         }
         else {
             botLoopTimeout = setTimeout(botLoop, timeoutMs);
-            myTurn = false;
         }
 
         showHandIfPossible();
