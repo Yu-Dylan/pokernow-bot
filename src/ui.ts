@@ -107,17 +107,17 @@ export function getPhase() {
 }
 
 export function getStack() {
-    const stackText = document.querySelector(".table-player.you-player .table-player-stack")?.textContent;
+    const stackText = document.querySelector(".table-player.you-player .table-player-stack .normal-value")?.textContent;
     return parseInt(stackText ?? "0");
 }
 
 export function getTotalPot() {
-    const potText = document.querySelector(".table-pot-size .add-on .chips-value")?.textContent;
+    const potText = document.querySelector(".table-pot-size .add-on .chips-value .normal-value")?.textContent;
     return parseInt(potText ?? "0");
 }
 
 export function getPrevPhasePot() {
-    const prevPotText = document.querySelector(".table-pot-size .main-value .chips-value")?.textContent;
+    const prevPotText = document.querySelector(".table-pot-size .main-value .chips-value .normal-value")?.textContent;
     return parseInt(prevPotText ?? "0");
 }
 
@@ -189,11 +189,14 @@ export function getAllPlayerPhasePip(active: boolean = true): Map<Seat, number> 
     return pipMap;
 }
 
-export function getState(): State {
+export function getState(inBB: boolean = true): State {
     const hand = getHandCards();
     const board = getBoardCards();
     const activePlayersPhasePips = getAllPlayerPhasePip(true); 
     const allPlayersIn = Array.from(getAllPlayerPhasePip(false).keys());
+    const bigBlind = getBigBlindValue(); 
+    const tempCallvalue = getToCallValue();
+    const toCallValue = (inBB === true) ? bigBlind*tempCallvalue : tempCallvalue;
 
     return {
         phase: getPhase(),
@@ -202,11 +205,11 @@ export function getState(): State {
         hand,
         board,
         handPlusBoard: [...hand, ...board],
-        bigBlind: getBigBlindValue(),
+        bigBlind: bigBlind,
         stack: getStack(),
         pot: getTotalPot(),
         prevPhasePot: getPrevPhasePot(),
-        toCall: getToCallValue(),
+        toCall: toCallValue,
         activePlayerPhasePips: activePlayersPhasePips,
         phaseXBet: [
             {xBet: 1, aggressor: null},
@@ -253,8 +256,12 @@ export function customRaise(amount: number | undefined, callback?: () => void) {
     
     withRaiseMenu(() => {
         const raiseInput = document.querySelector<HTMLInputElement>('.raise-bet-value input');
+        const raiseInputAll = document.querySelector<HTMLInputElement>('.raise-bet-value');
+        console.log(raiseInputAll);
         if (!raiseInput) {
-            throw new Error("Custom raise input field not found.");
+            //throw new Error("Custom raise input field not found.");
+            console.log("Custom raise input field not found.")
+            return; 
         }
 
         raiseInput.value = amount.toString();
@@ -278,8 +285,7 @@ function withRaiseMenu(action: () => void) {
         () => {
             action();
             document.querySelector<HTMLButtonElement>('.raise-controller-form input[type="submit"]')?.click();
-        },
-        100,
+        }
     );
 }
 

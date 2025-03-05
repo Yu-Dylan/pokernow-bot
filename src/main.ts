@@ -4,9 +4,10 @@ import { performAction, sanitizeAction } from "./action";
 import { getNewState } from "./mainUtils";
 
 
-const timeoutMs = 10;
+const timeoutMs = 200;
 let botLoopTimeout: NodeJS.Timer | undefined;
 let state: State;
+let myTurn: boolean;
 
 console.log(`"pokerbot v${chrome.runtime.getManifest().version}"`);
 
@@ -47,6 +48,7 @@ function startBotLoop() {
         }
         else {
             botLoopTimeout = setTimeout(botLoop, timeoutMs);
+            myTurn = false;
         }
 
         showHandIfPossible();

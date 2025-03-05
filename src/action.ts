@@ -6,7 +6,7 @@ export function performAction(action: Action, callback: () => void) {
             check();
         else
             fold();
-            callback?.();
+        callback?.();
     }
     else if (action.type === "call") {
         call();
@@ -38,7 +38,7 @@ export function performAction(action: Action, callback: () => void) {
     }
 }
 
-export function sanitizeAction(action: Action | undefined, state: State) {
+export function sanitizeAction(action: Action | undefined, state: State, viewBB: boolean = true) {
     let sanitized = {...action!};
 
     switch (sanitized.type) {
@@ -76,6 +76,8 @@ export function sanitizeAction(action: Action | undefined, state: State) {
             sanitized.raiseAmount = state.stack + state.phasePip;
         }
     }
-
+    if (viewBB && sanitized.raiseAmount !== undefined) {
+        sanitized.raiseAmount = Math.round(sanitized.raiseAmount/state.bigBlind*100);
+    }
     return sanitized;
 }
